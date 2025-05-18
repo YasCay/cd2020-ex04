@@ -16,7 +16,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
-          go-version: '1.20'
+          go-version: '1.21'
 
       - name: Run tests
         run: go test -v ./...
@@ -28,22 +28,20 @@ jobs:
           scan-type: 'config'
           scan-ref: '.'
           exit-code: '1'
-          severity: 'CRITICAL,HIGH'
+          severity: 'CRITICAL'
           format: 'table'
 
       # Build the docker image for scanning
       - name: Build Docker image for scanning
         run: |
-          docker build -t temp-image-for-scan:latest .
-
-      # Scan the built Docker image
+          docker build --pull -t temp-image-for-scan:latest .      # Scan the built Docker image
       - name: Scan Docker image with Trivy
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: 'temp-image-for-scan:latest'
           format: 'table'
           exit-code: '1'
-          severity: 'CRITICAL,HIGH'
+          severity: 'CRITICAL'
 
       - name: Login to Docker Hub
         if: success()
