@@ -15,6 +15,15 @@ RUN ls -la
 # Build the GO app as myapp binary and move it to /usr/
 RUN go build -o /usr/myapp main.go
 
+# Create a non-root user
+RUN adduser -D -g '' appuser
+
+# Change ownership of the application binary
+RUN chown appuser:appuser /usr/myapp
+
+# Switch to non-root user
+USER appuser
+
 # Expose port 8888
 EXPOSE 8888
 
