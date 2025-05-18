@@ -1,11 +1,10 @@
-# This workflow builds a Docker image and pushes it to Docker Hub.
 name: Build and Push Docker Image
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
 
 jobs:
   build:
