@@ -21,7 +21,32 @@ jobs:
       - name: Run tests
         run: go test -v ./...
 
+      # Scan Dockerfile and IaC files for vulnerabilities
+      - name: Scan IaC files with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          scan-ref: '.'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
+          format: 'table'
+
+      # Build the docker image for scanning
+      - name: Build Docker image for scanning
+        run: |
+          docker build -t temp-image-for-scan:latest .
+
+      # Scan the built Docker image
+      - name: Scan Docker image with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'temp-image-for-scan:latest'
+          format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
+
       - name: Login to Docker Hub
+        if: success()
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -32,6 +57,7 @@ jobs:
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
       - name: Build and push Docker image
+        if: success()
         uses: docker/build-push-action@v4
         with:
           context: .
